@@ -36,6 +36,29 @@ def create_store():
   print(stores)
   return store, 201
 
+@app.put("/store/<string:store_id>")
+def update_store(store_id):
+  store_data = request.get_json()
+  if "name" not in store_data:
+    abort(
+      400,
+      message="Bad request. Ensure 'name' is include in the JSON payload."
+    )
+  try:
+    store = stores[store_id]
+    store |= store_data
+    return store
+  except KeyError:
+    abort(400, message="Item not found")
+
+@app.delete("/store/<string:store_id>")
+def delete_store(store_id):
+  try:
+    del stores[store_id]
+    return {"message": "Store deleted."}
+  except KeyError:
+    abort(400, message="Store not found.")
+
 @app.get("/item")
 def get_items():
   return {"items": list(items.values())}
@@ -77,3 +100,29 @@ def create_item():
   items[item_id] = item
   
   return item, 201
+
+@app.put("/item/<string:item_id>")
+def update_item(item_id):
+  item_data = request.get_json()
+  if(
+    "price" not in item_data
+    or "name" not in item_data
+  ):
+    abort(
+      400,
+      message="bad request. Ensure 'price', and 'name' are included in the JSON payload."
+    )
+  try:
+    item = items[item_id]
+    item |= item_data
+    return item
+  except KeyError:
+    abort(400, message="Item not found")
+
+@app.delete("/item/<string:item_id>")
+def delete_item(item_id):
+  try:
+    del items[item_id]
+    return {"message": "Item deleted."}
+  except KeyError:
+    abort(400, message="Item not found.")
