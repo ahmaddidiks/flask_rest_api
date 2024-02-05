@@ -12,7 +12,8 @@ blp = Blueprint("Stores", __name__, description="Operations on stores")
 class Store(MethodView):
   @blp.response(200, StoreSchema)
   def get(self, store_id):
-     raise NotImplementedError("Getting a store is not implemented.")
+    store = StoreModel.query.get_or_404(store_id)
+    return store
 
   @blp.arguments(StoreSchema)
   def put(self, store_data, store_id):
