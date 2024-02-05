@@ -32,18 +32,16 @@ class Items(MethodView):
     return item
   
   def delete(self, item_id):
-    raise NotImplementedError("Deleting an item is not implemented.")
+    item = itemModel.query.get_or_404(item_id)
+    db.session.delete(item)
+    db.session.commit()
+    return {"message": "Item deleted."}
 
 @blp.route("/item")
 class ItemList(MethodView):
   @blp.response(200, ItemSchema(many=True))
   def get(self):
-    return {
-      "username": "admin",
-      "email": "admin@localhost",
-      "id": 42
-    }
-    # raise NotImplementedError("Listing items is not implemented.")
+    return itemModel.query.all()
 
   @blp.arguments(ItemSchema)
   @blp.response(201, ItemSchema)
