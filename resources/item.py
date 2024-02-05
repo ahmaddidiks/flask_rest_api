@@ -26,9 +26,23 @@ class Items(MethodView):
 class ItemList(MethodView):
   @blp.response(200, ItemSchema(many=True))
   def get(self):
-    raise NotImplementedError("Listing items is not implemented.")
+    return {
+      "username": "admin",
+      "email": "admin@localhost",
+      "id": 42
+    }
+    # raise NotImplementedError("Listing items is not implemented.")
 
   @blp.arguments(ItemSchema)
   @blp.response(201, ItemSchema)
   def post(self, item_data):
-    raise NotImplementedError("Creating an item is not implemented.")
+    item = itemModel(**item_data)
+
+    try:
+      db.session.add(item)
+      db.session.commit()
+    except SQLAlchemyError:
+      abort(500, message="An error occured while insertinf the item.")
+    
+    return item
+
