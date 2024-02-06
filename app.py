@@ -32,6 +32,14 @@ def create_app(db_url=None):
   app.config['JWT_SECRET_KEY'] = str(secrets.SystemRandom().getrandbits(128))
   jwt = JWTManager(app)
 
+  @jwt.additional_claims_loader
+  def add_claims_to_jwt(identity):
+    # Look in the database and see wether the user is an admin
+    if identity == 1:
+      return {"is_admin": True}
+    return {"is_admin": False}
+
+
   @jwt.expired_token_loader
   def expired_token_loader(jwt_header, jwt_payload):
     return(
