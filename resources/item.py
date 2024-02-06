@@ -25,7 +25,6 @@ class Items(MethodView):
     else:
       item = ItemModel(id=item_id, **item_data)
     
-    print(item)
     db.session.add(item)
     db.session.commit()
 
