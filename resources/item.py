@@ -1,5 +1,6 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
+from flask_jwt_extended import jwt_required, get_jwt
 from sqlalchemy.exc import SQLAlchemyError
 
 from db import db
@@ -8,13 +9,15 @@ from schemas import ItemSchema, ItemUpdateSchema
 
 blp = Blueprint("Items", "items", description="Operations on items")
 
-@blp.route("/item/<string:item_id>")
+@blp.route("/item/<int:item_id>")
 class Items(MethodView):
+  @jwt_required()
   @blp.response(200, ItemSchema)
   def get(self, item_id):
     item = ItemModel.query.get_or_404(item_id)
     return item
   
+  @jwt_required()
   @blp.arguments(ItemUpdateSchema)
   @blp.response(200, ItemSchema)
   def put(self, item_data, item_id):
@@ -30,7 +33,12 @@ class Items(MethodView):
 
     return item
   
+  @jwt_required()
   def delete(self, item_id):
+    jwt = get_jwt()
+    if not jwt.get("is_admin"):
+       abort(401, message="Admin privilage required.")
+
     item = ItemModel.query.get_or_404(item_id)
     db.session.delete(item)
     db.session.commit()
@@ -42,6 +50,7 @@ class ItemList(MethodView):
   def get(self):
       return ItemModel.query.all()
 
+  @jwt_required(fresh=True)
   @blp.arguments(ItemSchema)
   @blp.response(201, ItemSchema)
   def post(self, item_data):
